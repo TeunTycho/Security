@@ -1,0 +1,33 @@
+name: Move CSV Report
+
+on:
+  workflow_run:
+    workflows: ["Generate Incident Report"]
+    types:
+      - completed
+
+jobs:
+  move-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: incident_report
+          path: csv_report
+
+      - name: Move CSV to the "Security" repository
+        run: |
+          # Replace "TeunTycho" with your GitHub username and "Security" with the repository name
+          owner="TeunTycho"
+          repo="Security"
+          mkdir -p $HOME/report
+          mv csv_report/* $HOME/report
+          cd $HOME/report
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Add incident report CSV"
+          git remote add origin "https://github.com/$owner/$repo.git"
+          git push --force origin main
