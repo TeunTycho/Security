@@ -4,8 +4,7 @@ on:
   workflow_run:
     workflows: ["Generate Incident Report"]
     types:
-      - completed
-    
+      - completed    
 jobs:
   move-csv:
     runs-on: ubuntu-latest
