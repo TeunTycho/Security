@@ -1,36 +1,32 @@
-# This is a basic workflow to help you get started with Actions
+name: Move CSV Report
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  workflow_run:
+    workflows: ["Generate Incident Report"]
+    types:
+      - completed    
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  move-csv:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Download report artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: incident_report
+          path: csv_report
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Move CSV to the "Security" repository
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          # Replace "TeunTycho" with your GitHub username and "Security" with the repository name
+          owner="TeunTycho"
+          repo="Security"
+          mkdir -p $HOME/report
+          mv csv_report/* $HOME/report
+          cd $HOME/report
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Add incident report CSV"
+          git remote add origin "https://github.com/$owner/$repo.git"
+          git push --force origin main
